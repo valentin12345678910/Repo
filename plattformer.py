@@ -52,7 +52,7 @@ class GameView(arcade.Window):
  
         # self.player_texture = arcade.load_texture("spieler2.png")
  
-        self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
+        self.player_sprite = arcade.Sprite("spieler2.png")
         self.player_sprite.center_x = 128
         self.player_sprite.center_y = 128
         self.scene.add_sprite("Spieler", self.player_sprite)
