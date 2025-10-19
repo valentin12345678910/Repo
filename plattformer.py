@@ -18,11 +18,18 @@ PLAYER_JUMP_SPEED = 4
 
 class GameView(arcade.Window):
 
-    def __init__(self):
+    def Camera2D__init__(self):
+        self.move_to = arcade.Camera2D(move_to=True)
+
+
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
         self.camera = arcade.Camera2D()
         self.gui_camera = arcade.Camera2D()
+        self.__init__(player_list=None)
+        
+        
+        
 
         self.scene = None
         self.tile_map = None
@@ -158,7 +165,7 @@ class GameView(arcade.Window):
 
 
 def main():
-    window = GameView()
+    window = GameView(player_list=None)
     window.setup()
     arcade.run()
 
