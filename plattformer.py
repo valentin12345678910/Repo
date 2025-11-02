@@ -1,51 +1,38 @@
 import arcade
-import os
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
 
-TILE_SCALING = 0.5
+TILE_SCALING = 3
 COIN_SCALING = 0.5
  
-PLAYER_MOVEMENT_SPEED = 10
-GRAVITY = 1
-PLAYER_JUMP_SPEED = 20
-PLAYER_MOVEMENT_SPEED = 1.5
-GRAVITY = 0.10
-PLAYER_JUMP_SPEED = 4
+GRAVITY = 0.5
+PLAYER_MOVEMENT_SPEED = 3
+PLAYER_JUMP_SPEED = 10
 
 
 class GameView(arcade.Window):
-
-    def Camera2D__init__(self):
-        self.move_to = arcade.Camera2D(move_to=True)
-
-
+    def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
 
+        self.wall_list = None
+        self.coin_list = None
         self.camera = arcade.Camera2D()
         self.gui_camera = arcade.Camera2D()
-        self.__init__(player_list=None)
-        
-        
-        
 
         self.scene = None
         self.tile_map = None
         self.player_sprite = None
-
         self.player_list = arcade.SpriteList()
         self.physics_engine = None
+        
 
         self.score = 0
-        self.score_text = None
-
+        self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
         self.coins_needed = 40
-
-        self.time_left = 30.0
-
+        self.time_left = 30
         self.game_over = False
         self.game_won = False
 
@@ -53,7 +40,7 @@ class GameView(arcade.Window):
 
     def setup(self):
         layer_options = {
-            "Plattforms": {"use_spatial_hash": True}
+            "Plattformen": {"use_spatial_hash": True}
         }
 
         self.tile_map = arcade.load_tilemap(
@@ -64,17 +51,22 @@ class GameView(arcade.Window):
         
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
-
         self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
         self.player_list.append(self.player_sprite)
-        self.player_sprite.center_x = WINDOW_WIDTH // 2
-        self.player_sprite.center_y = WINDOW_HEIGHT // 2
-            
-        self.camera.move_to((self.player_sprite.center_x - WINDOW_WIDTH/2, self.player_sprite.center_y - WINDOW_HEIGHT/2), 0.0)
-            
-        platforms = self.scene["Plattforms"]
-        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
+        self.player_sprite.center_x = 10
+        self.player_sprite.center_y = WINDOW_HEIGHT
 
+        self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
+
+        platforms = self.scene["Plattformen"]
+
+        for x in range(128, 1250, 256):
+            coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=COIN_SCALING)
+            coin.center_x = x
+            coin.center_y = 100
+            self.coin_list.append(coin)
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
 
     def on_draw(self):
         
@@ -82,8 +74,8 @@ class GameView(arcade.Window):
 
         self.camera.use()
 
-        self.scene.draw()
-        self.player_list.draw()
+        self.scene.draw(pixelated=True)
+        self.player_list.draw(pixelated=True)
 
         self.gui_camera.use()
 
@@ -134,12 +126,9 @@ class GameView(arcade.Window):
             if self.coins_collected >= self.coins_needed:
                 self.game_won = True
         
-
-        
         self.physics_engine.update()
         self.player_sprite.update()
-        self.camera.move_to((self.player_sprite.center_x - WINDOW_WIDTH/2, self.player_sprite.center_y - WINDOW_HEIGHT/2), 0.1)
-           
+        self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
@@ -164,13 +153,12 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = 0
 
 
+
 def main():
-    window = GameView(player_list=None)
+    window = GameView()
     window.setup()
     arcade.run()
 
 
 if __name__ == "__main__":
     main()
-
-
