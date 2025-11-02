@@ -32,7 +32,7 @@ class GameView(arcade.Window):
         self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
         self.coins_needed = 40
-        self.time_left = 30
+        self.time_left = 50.0
         self.game_over = False
         self.game_won = False
 
@@ -59,13 +59,11 @@ class GameView(arcade.Window):
         self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
         platforms = self.scene["Plattformen"]
+        self.wall_list = platforms
 
-        for x in range(128, 1250, 256):
-            coin = arcade.Sprite(":resources:images/items/coinGold.png", scale=COIN_SCALING)
             coin.center_x = x
-            coin.center_y = 100
-            self.coin_list.append(coin)
-
+        self.coin_list = self.scene["Münzen"]
+    
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
 
     def on_draw(self):
@@ -80,7 +78,12 @@ class GameView(arcade.Window):
         self.gui_camera.use()
 
         self.score_text.draw()
-            
+
+        self.player_list.draw()
+        self.wall_list.draw()
+
+        self.coin_list.draw()
+
         time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
         arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
         arcade.draw_text(f"Münzen: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
