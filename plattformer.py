@@ -8,7 +8,7 @@ TILE_SCALING = 3
 COIN_SCALING = 0.5
  
 GRAVITY = 0.5
-PLAYER_MOVEMENT_SPEED = 3
+PLAYER_MOVEMENT_SPEED = 6
 PLAYER_JUMP_SPEED = 10
 
 
@@ -31,8 +31,8 @@ class GameView(arcade.Window):
         self.score = 0
         self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
-        self.coins_needed = 40
-        self.time_left = 50.0
+        self.coins_needed = 39
+        self.time_left = 80
         self.game_over = False
         self.game_won = False
 
@@ -61,7 +61,6 @@ class GameView(arcade.Window):
         platforms = self.scene["Plattformen"]
         self.wall_list = platforms
 
-            coin.center_x = x
         self.coin_list = self.scene["Münzen"]
     
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
@@ -79,11 +78,7 @@ class GameView(arcade.Window):
 
         self.score_text.draw()
 
-        self.player_list.draw()
-        self.wall_list.draw()
-
-        self.coin_list.draw()
-
+        
         time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
         arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
         arcade.draw_text(f"Münzen: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
@@ -120,14 +115,15 @@ class GameView(arcade.Window):
             self.game_over = True
 
     
-            coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.scene["Münzen"])
-            for coin in coin_hit_list:
-                coin.remove_from_sprite_lists()
-                self.coins_collected += 1
-                self.score += 75
-                self.score_text.text = f"Score: {self.score}"
-            if self.coins_collected >= self.coins_needed:
-                self.game_won = True
+        coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
+
+        for coin in coin_hit_list:
+            coin.remove_from_sprite_lists()
+            self.coins_collected += 1
+            self.score += 75
+            self.score_text.text = f"Score: {self.score}"
+        if self.coins_collected >= self.coins_needed:
+            self.game_won = True
         
         self.physics_engine.update()
         self.player_sprite.update()
