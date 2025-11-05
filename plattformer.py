@@ -8,7 +8,7 @@ TILE_SCALING = 3
 COIN_SCALING = 0.5
  
 GRAVITY = 0.5
-PLAYER_MOVEMENT_SPEED = 6
+PLAYER_MOVEMENT_SPEED = 5.5
 PLAYER_JUMP_SPEED = 10
 
 
@@ -32,7 +32,7 @@ class GameView(arcade.Window):
         self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
         self.coins_needed = 39
-        self.time_left = 80
+        self.time_left = 40
         self.game_over = False
         self.game_won = False
 
