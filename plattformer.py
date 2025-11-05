@@ -12,6 +12,7 @@ PLAYER_MOVEMENT_SPEED = 5.5
 PLAYER_JUMP_SPEED = 10
 
 
+
 class GameView(arcade.Window):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
@@ -32,7 +33,7 @@ class GameView(arcade.Window):
         self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
         self.coins_needed = 39
-        self.time_left = 40
+        self.time_left = 60
         self.game_over = False
         self.game_won = False
 
@@ -52,11 +53,7 @@ class GameView(arcade.Window):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
-        self.player_list.append(self.player_sprite)
-        self.player_sprite.center_x = 10
-        self.player_sprite.center_y = WINDOW_HEIGHT
 
-        self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
         platforms = self.scene["Plattformen"]
         self.wall_list = platforms
@@ -90,7 +87,7 @@ class GameView(arcade.Window):
             arcade.draw_text(
                 message,
                 self.player_sprite.center_x,
-                self.player_sprite.center_y + 100,
+                self.player_sprite.center_y + 200,
                 color,
                 50,
                 anchor_x="center",
