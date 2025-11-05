@@ -33,7 +33,7 @@ class GameView(arcade.Window):
         self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
         self.coins_needed = 39
-        self.time_left = 60
+        self.time_left = 70
         self.game_over = False
         self.game_won = False
 
@@ -80,27 +80,7 @@ class GameView(arcade.Window):
         arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
         arcade.draw_text(f"Münzen: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
 
-        if self.game_over or self.game_won:
-            message = "GEWONNEN!" if self.game_won else "SPIEL VORBEI!"
-            color = arcade.color.GREEN if self.game_won else arcade.color.RED
-
-            arcade.draw_text(
-                message,
-                self.player_sprite.center_x,
-                self.player_sprite.center_y + 200,
-                color,
-                50,
-                anchor_x="center",
-                anchor_y="center"
-            )
-            arcade.draw_text(
-                "Drücke LEERTASTE zum Neustarten",
-                self.player_sprite.center_x,
-                self.player_sprite.center_y + 40,
-                arcade.color.WHITE,
-                20,
-                anchor_x="center"
-            )
+        
 
     def on_update(self, delta_time):
         if self.game_over or self.game_won:
