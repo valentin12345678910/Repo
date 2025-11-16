@@ -31,7 +31,7 @@ class GameView(arcade.Window):
         self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
         self.coins_needed = 46
-        self.time_left = 70
+        self.time_left = 120
         self.game_over = False
         self.game_won = False
 
@@ -111,8 +111,9 @@ class GameView(arcade.Window):
 
         monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
         if monster_hit_list:
-            self.center_x = 100
-            self.center_y = 1700
+            self.game_over = True
+
+     
 
     
 
