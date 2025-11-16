@@ -27,15 +27,15 @@ class GameView(arcade.Window):
         self.player_sprite = None
         self.player_list = arcade.SpriteList()
         self.physics_engine = None
-        
-
-        self.score = 0
+    
         self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
-        self.coins_needed = 39
+        self.coins_needed = 46
         self.time_left = 70
         self.game_over = False
         self.game_won = False
+
+    
 
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
@@ -53,12 +53,17 @@ class GameView(arcade.Window):
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
-
-
+        self.player_list.append(self.player_sprite)
+        self.player_sprite.center_x = 100
+        self.player_sprite.center_y = 1700
+   
+   
         platforms = self.scene["Plattformen"]
         self.wall_list = platforms
 
         self.coin_list = self.scene["Münzen"]
+
+        self.monster_list = self.scene["monster"]
     
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
 
@@ -97,14 +102,19 @@ class GameView(arcade.Window):
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
             self.coins_collected += 1
-            self.score += 75
-            self.score_text.text = f"Score: {self.score}"
         if self.coins_collected >= self.coins_needed:
             self.game_won = True
         
         self.physics_engine.update()
         self.player_sprite.update()
         self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
+
+        monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
+        if monster_hit_list:
+            self.center_x = 100
+            self.center_y = 1700
+
+    
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
