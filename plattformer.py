@@ -28,9 +28,8 @@ class GameView(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.physics_engine = None
     
-        self.score_text = arcade.Text("Score: 0", 10, 10, arcade.color.WHITE, 18)
         self.coins_collected = 0
-        self.coins_needed = 46
+        self.coins_needed = 48
         self.time_left = 120
         self.game_over = False
         self.game_won = False
@@ -64,6 +63,15 @@ class GameView(arcade.Window):
         self.coin_list = self.scene["Münzen"]
 
         self.monster_list = self.scene["monster"]
+
+        self.jetpack_list = self.scene["jetpack"]
+
+        self.op_list = self.scene["op"]
+
+        self.goldenerop_list = self.scene["goldenerop"]
+
+        self.megajetpack_list = self.scene["megajetpack"]
+
     
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
 
@@ -78,12 +86,34 @@ class GameView(arcade.Window):
 
         self.gui_camera.use()
 
-        self.score_text.draw()
 
         
         time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
         arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
         arcade.draw_text(f"Münzen: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
+
+
+        jetpack_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list)
+        for jetpack in jetpack_hit_list:
+            jetpack.remove_from_sprite_lists()
+            self.time_left -= 15
+
+        op_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.op_list)
+        for op in op_hit_list:
+            op.remove_from_sprite_lists()
+            self.time_left += 15
+
+        megajetpack_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.megajetpack_list)
+        for megajetpack in megajetpack_hit_list:
+            megajetpack.remove_from_sprite_lists()
+            self.time_left -= 30
+
+        goldenerop_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.goldenerop_list)
+        for goldenerop in goldenerop_hit_list:
+            goldenerop.remove_from_sprite_lists()
+            self.time_left += 30
+
+          
 
         
 
