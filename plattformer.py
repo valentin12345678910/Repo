@@ -29,7 +29,7 @@ class GameView(arcade.Window):
         self.physics_engine = None
     
         self.coins_collected = 0
-        self.coins_needed = 59
+        self.coins_needed = 58
         self.time_left = 120
         self.game_over = False
         self.game_won = False
@@ -92,7 +92,7 @@ class GameView(arcade.Window):
         
         time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
         arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
-        arcade.draw_text(f"Münzen: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
+        arcade.draw_text(f"Rüben: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
 
 
         jetpack_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list)
