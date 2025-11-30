@@ -8,7 +8,7 @@ TILE_SCALING = 3
 COIN_SCALING = 0.5
  
 GRAVITY = 0.5
-PLAYER_MOVEMENT_SPEED = 5.5
+PLAYER_MOVEMENT_SPEED = 5
 PLAYER_JUMP_SPEED = 10
 
 
@@ -29,7 +29,7 @@ class GameView(arcade.Window):
         self.physics_engine = None
     
         self.coins_collected = 0
-        self.coins_needed = 48
+        self.coins_needed = 59
         self.time_left = 120
         self.game_over = False
         self.game_won = False
@@ -72,6 +72,8 @@ class GameView(arcade.Window):
 
         self.megajetpack_list = self.scene["megajetpack"]
 
+        self.zuffalblock_list = self.scene["zuffalblock"]
+
     
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
 
@@ -113,6 +115,13 @@ class GameView(arcade.Window):
             goldenerop.remove_from_sprite_lists()
             self.time_left += 30
 
+        zuffalblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.zuffalblock_list)
+        for zuffalblock in zuffalblock_hit_list:
+            zuffalblock.remove_from_sprite_lists()
+            import random
+            self.game_over = random.choice([True, False])
+            if not self.game_over:
+                self.time_left += 50
           
 
         
