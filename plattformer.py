@@ -29,8 +29,8 @@ class GameView(arcade.Window):
         self.physics_engine = None
     
         self.coins_collected = 0
-        self.coins_needed = 58
-        self.time_left = 120
+        self.coins_needed = 59
+        self.time_left = 110
         self.game_over = False
         self.game_won = False
 
