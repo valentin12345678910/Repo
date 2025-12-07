@@ -13,6 +13,8 @@ PLAYER_JUMP_SPEED = 10
 
 
 
+
+
 class GameView(arcade.Window):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE)
@@ -33,6 +35,8 @@ class GameView(arcade.Window):
         self.time_left = 110
         self.game_over = False
         self.game_won = False
+
+        self.physik.enable_multi_jump(2)
 
     
 
@@ -73,6 +77,8 @@ class GameView(arcade.Window):
         self.megajetpack_list = self.scene["megajetpack"]
 
         self.zuffalblock_list = self.scene["zuffalblock"]
+
+        self.spawner_list = self.scene["spawner"]
 
     
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
@@ -151,6 +157,12 @@ class GameView(arcade.Window):
         monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
         if monster_hit_list:
             self.game_over = True
+
+
+        spawner_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list)
+        if spawner_hit_list:
+            self.player_sprite.center_x = 100
+            self.player_sprite.center_y = 1700
 
      
 
