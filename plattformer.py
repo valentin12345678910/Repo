@@ -37,9 +37,11 @@ class GameView(arcade.Window):
     
         self.coins_collected = 0
         self.coins_needed = 60
-        self.time_left = 110
+        self.time_left = 105
         self.game_over = False
         self.game_won = False
+        self.enable_multi_jump = 2
+        
 
 
     
