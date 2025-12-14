@@ -10,6 +10,9 @@ COIN_SCALING = 0.5
 GRAVITY = 0.5
 PLAYER_MOVEMENT_SPEED = 5
 PLAYER_JUMP_SPEED = 10
+LEDER_SPEED = 5
+
+    
 
 
 
@@ -29,9 +32,11 @@ class GameView(arcade.Window):
         self.player_sprite = None
         self.player_list = arcade.SpriteList()
         self.physics_engine = None
+        self.on_ladder = False
+        self.held_keys = set()
     
         self.coins_collected = 0
-        self.coins_needed = 59
+        self.coins_needed = 60
         self.time_left = 110
         self.game_over = False
         self.game_won = False
@@ -79,6 +84,9 @@ class GameView(arcade.Window):
 
         self.spawner_list = self.scene["spawner"]
 
+        self.supersprungblock_list = self.scene["supersprungblock"]
+
+        self.leiter_list = self.scene["leiter"]
     
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
 
@@ -128,7 +136,25 @@ class GameView(arcade.Window):
             if not self.game_over:
                 self.time_left += 50
 
+        supersprungblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.supersprungblock_list)
+        for supersprungblock in supersprungblock_hit_list:
+            supersprungblock.remove_from_sprite_lists()
+            self.player_sprite.change_y = PLAYER_JUMP_SPEED * 2
 
+        leder_hit_list = []
+        if self.leiter_list is not None:
+            leder_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.leiter_list)
+
+        if leder_hit_list:
+            self.on_ladder = True
+        else:
+            self.on_ladder = False
+
+
+
+
+        
+                       
 
 
         
@@ -153,6 +179,15 @@ class GameView(arcade.Window):
         
         self.physics_engine.update()
         self.player_sprite.update()
+
+        if getattr(self, "on_ladder", False):
+            if arcade.key.UP in self.held_keys or arcade.key.W in self.held_keys:
+                self.player_sprite.change_y = LEDER_SPEED
+            elif arcade.key.DOWN in self.held_keys or arcade.key.S in self.held_keys:
+                self.player_sprite.change_y = -LEDER_SPEED
+            else:
+                self.player_sprite.change_y = 0
+
         self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
         monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
@@ -170,6 +205,11 @@ class GameView(arcade.Window):
     
 
     def on_key_press(self, key, modifiers):
+       
+        try:
+            self.held_keys.add(key)
+        except Exception:
+            pass
         if key == arcade.key.ESCAPE:
             self.close()
 
@@ -187,6 +227,13 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
     def on_key_release(self, key, modifiers):
+
+        try:
+            if key in self.held_keys:
+                self.held_keys.remove(key)
+        except Exception:
+            pass
+
         if key in [arcade.key.LEFT, arcade.key.A, arcade.key.RIGHT, arcade.key.D]:
             if self.player_sprite is not None:
                 self.player_sprite.change_x = 0
