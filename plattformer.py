@@ -130,13 +130,6 @@ class GameView(arcade.Window):
 
 
 
-        if self.game_over:
-            arcade.draw_text("Game Over! Drücke Leertaste zum Neustarten.", self.width / 2, self.height / 2,
-                             arcade.color.RED, 24, anchor_x="center")
-        elif self.game_won:
-            arcade.draw_text("Du hast gewonnen! Drücke Leertaste zum Neustarten.", self.width / 2, self.height / 2,
-                             arcade.color.GREEN, 24, anchor_x="center")
-          
 
         
 
