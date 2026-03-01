@@ -1,5 +1,6 @@
 import arcade
 
+                                                                                                                                                                                   
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 WINDOW_TITLE = "Platformer"
@@ -11,12 +12,6 @@ GRAVITY = 0.5
 PLAYER_MOVEMENT_SPEED = 5
 PLAYER_JUMP_SPEED = 10
 LEDER_SPEED = 5
-
-    
-
-
-
-
 
 class GameView(arcade.Window):
     def __init__(self):
@@ -37,15 +32,10 @@ class GameView(arcade.Window):
     
         self.coins_collected = 0
         self.coins_needed = 60
-        self.time_left = 105
+        self.time_left = 110
         self.game_over = False
         self.game_won = False
-        self.enable_multi_jump = 2
         
-
-
-    
-
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
     def setup(self):
@@ -89,26 +79,79 @@ class GameView(arcade.Window):
         self.supersprungblock_list = self.scene["supersprungblock"]
 
         self.leiter_list = self.scene["leiter"]
-    
+
+        self.langsamblock_list = self.scene["langsamblock"]
+
+        self.sprungblock_list = self.scene["sprungblock"]
+
+        self.freezer_list = self.scene["freezer"]
+
+       
+
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
 
-    def on_draw(self):
-        
-        self.clear()
+        self.stopper = 0
 
+    def on_draw(self):
         self.camera.use()
+        self.clear()
 
         self.scene.draw(pixelated=True)
         self.player_list.draw(pixelated=True)
 
         self.gui_camera.use()
 
-
-        
         time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
         arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
         arcade.draw_text(f"Rüben: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
 
+
+    def on_update(self, delta_time):
+        if self.game_over or self.game_won:
+            return
+
+        self.stopper -= delta_time
+
+        self.time_left -= delta_time
+        if self.time_left <= 0:
+            self.time_left = 0
+            self.game_over = True
+
+    
+        coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
+
+        for coin in coin_hit_list:
+            coin.remove_from_sprite_lists()
+            self.coins_collected += 1
+        if self.coins_collected >= self.coins_needed:
+            self.game_won = True
+        if self.stopper >= 0:
+            return
+        self.physics_engine.update()
+        self.player_sprite.update()
+
+        if getattr(self, "on_ladder", False):
+            if arcade.key.UP in self.held_keys or arcade.key.W in self.held_keys:
+                self.player_sprite.change_y = LEDER_SPEED
+            elif arcade.key.DOWN in self.held_keys or arcade.key.S in self.held_keys:
+                self.player_sprite.change_y = -LEDER_SPEED
+            else:
+                self.player_sprite.change_y = 0
+
+        self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
+
+        monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
+        if monster_hit_list:
+            self.game_over = True
+
+
+      
+
+
+        spawner_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list)
+        if spawner_hit_list:
+            self.player_sprite.center_x = 100
+            self.player_sprite.center_y = 1700
 
         jetpack_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list)
         for jetpack in jetpack_hit_list:
@@ -142,72 +185,41 @@ class GameView(arcade.Window):
         for supersprungblock in supersprungblock_hit_list:
             supersprungblock.remove_from_sprite_lists()
             self.player_sprite.change_y = PLAYER_JUMP_SPEED * 2
+            
+
+
+        sprungblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.sprungblock_list)
+        for sprungblock in sprungblock_hit_list:
+            sprungblock.remove_from_sprite_lists()
+            self.player_sprite.change_y = PLAYER_JUMP_SPEED * 1
+
+        langsamblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.langsamblock_list)
+        for langsamblock in langsamblock_hit_list:
+            langsamblock.remove_from_sprite_lists()
+            global PLAYER_MOVEMENT_SPEED
+            PLAYER_MOVEMENT_SPEED = max(2, PLAYER_MOVEMENT_SPEED - 0.4)
+
+
+        freezer_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.freezer_list)
+        for freezer in freezer_hit_list:
+            freezer.remove_from_sprite_lists()
+            self.stopper = 3
+
+        
 
         leder_hit_list = []
         if self.leiter_list is not None:
             leder_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.leiter_list)
 
+
         if leder_hit_list:
             self.on_ladder = True
         else:
             self.on_ladder = False
-
-
-
-
         
-                       
-
-
-        
-
-    def on_update(self, delta_time):
-        if self.game_over or self.game_won:
-            return
-
-        self.time_left -= delta_time
-        if self.time_left <= 0:
-            self.time_left = 0
-            self.game_over = True
-
     
-        coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
-
-        for coin in coin_hit_list:
-            coin.remove_from_sprite_lists()
-            self.coins_collected += 1
-        if self.coins_collected >= self.coins_needed:
-            self.game_won = True
-        
-        self.physics_engine.update()
-        self.player_sprite.update()
-
-        if getattr(self, "on_ladder", False):
-            if arcade.key.UP in self.held_keys or arcade.key.W in self.held_keys:
-                self.player_sprite.change_y = LEDER_SPEED
-            elif arcade.key.DOWN in self.held_keys or arcade.key.S in self.held_keys:
-                self.player_sprite.change_y = -LEDER_SPEED
-            else:
-                self.player_sprite.change_y = 0
-
-        self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
-
-        monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
-        if monster_hit_list:
-            self.game_over = True
-
-
-        spawner_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list)
-        if spawner_hit_list:
-            self.player_sprite.center_x = 100
-            self.player_sprite.center_y = 1700
-
-     
-
-    
-
     def on_key_press(self, key, modifiers):
-       
+         
         try:
             self.held_keys.add(key)
         except Exception:
@@ -215,9 +227,7 @@ class GameView(arcade.Window):
         if key == arcade.key.ESCAPE:
             self.close()
 
-        if key == arcade.key.SPACE and (self.game_over or self.game_won):
-            self.setup()
-
+       
         if not self.game_over and not self.game_won:
             if key in [arcade.key.UP, arcade.key.W]:
                 if self.physics_engine.can_jump():
@@ -227,6 +237,18 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+
+            if key == arcade.key.SPACE:
+                self.space_pressed = True
+                self.player_sprite.center_x = 100
+                self.player_sprite.center_y = 1700
+
+            if key == arcade.key.SPACE:
+                self.time_left -= 10
+
+           
+
+                
 
     def on_key_release(self, key, modifiers):
 
@@ -239,8 +261,6 @@ class GameView(arcade.Window):
         if key in [arcade.key.LEFT, arcade.key.A, arcade.key.RIGHT, arcade.key.D]:
             if self.player_sprite is not None:
                 self.player_sprite.change_x = 0
-
-
 
 def main():
     window = GameView()
