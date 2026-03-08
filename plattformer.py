@@ -8,10 +8,15 @@ WINDOW_TITLE = "Platformer"
 TILE_SCALING = 3
 COIN_SCALING = 0.5
  
-GRAVITY = 0.5
-PLAYER_MOVEMENT_SPEED = 5
-PLAYER_JUMP_SPEED = 10
+GRAVITY = 0.8
+PLAYER_MOVEMENT_SPEED = 3
+PLAYER_JUMP_SPEED = 11
 LEDER_SPEED = 5
+
+
+#GRAVITY = 0.5
+#PLAYER_MOVEMENT_SPEED = 5
+#PLAYER_JUMP_SPEED = 10
 
 class GameView(arcade.Window):
     def __init__(self):
@@ -32,7 +37,8 @@ class GameView(arcade.Window):
     
         self.coins_collected = 0
         self.coins_needed = 60
-        self.time_left = 110
+        #self.time_left = 110
+        self.time_left = 500
         self.game_over = False
         self.game_won = False
         
@@ -54,7 +60,8 @@ class GameView(arcade.Window):
         self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
         self.player_list.append(self.player_sprite)
         self.player_sprite.center_x = 100
-        self.player_sprite.center_y = 1700
+        self.player_sprite.center_y = 4000
+
    
    
         platforms = self.scene["Plattformen"]
@@ -86,7 +93,7 @@ class GameView(arcade.Window):
 
         self.freezer_list = self.scene["freezer"]
 
-        self.checkpoint_list = self.scene["checkpoint"]
+        self.spawner2_list = self.scene["spawner2"]
 
        
 
@@ -146,19 +153,13 @@ class GameView(arcade.Window):
         if monster_hit_list:
             self.game_over = True
 
-
-        checkpoint_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.checkpoint_list)
-        for checkpoint in checkpoint_hit_list:
-            checkpo
-
-
       
 
 
         spawner_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list)
         if spawner_hit_list:
             self.player_sprite.center_x = 100
-            self.player_sprite.center_y = 1700
+            self.player_sprite.center_y = 4000
 
         jetpack_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list)
         for jetpack in jetpack_hit_list:
@@ -223,6 +224,13 @@ class GameView(arcade.Window):
             self.on_ladder = True
         else:
             self.on_ladder = False
+
+
+
+        spawner2_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner2_list)
+        if spawner2_hit_list:
+            self.player_sprite.center_x = 100
+            self.player_sprite.center_y = 100
         
     
     def on_key_press(self, key, modifiers):
@@ -245,13 +253,13 @@ class GameView(arcade.Window):
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
-            if key == arcade.key.SPACE:
-                self.space_pressed = True
-                self.player_sprite.center_x = 100
-                self.player_sprite.center_y = 1700
+            #if key == arcade.key.SPACE:
+            #    self.space_pressed = True
+            #    self.player_sprite.center_x = 100
+            #    self.player_sprite.center_y = 4000
 
-            if key == arcade.key.SPACE:
-                self.time_left -= 10
+            #if key == arcade.key.SPACE:
+             #   self.time_left -= 10
 
            
 
