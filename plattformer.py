@@ -86,6 +86,8 @@ class GameView(arcade.Window):
 
         self.freezer_list = self.scene["freezer"]
 
+        self.checkpoint_list = self.scene["checkpoint"]
+
        
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
@@ -143,6 +145,11 @@ class GameView(arcade.Window):
         monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
         if monster_hit_list:
             self.game_over = True
+
+
+        checkpoint_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.checkpoint_list)
+        for checkpoint in checkpoint_hit_list:
+            checkpo
 
 
       
