@@ -38,7 +38,6 @@ class GameView(arcade.Window):
         self.coins_collected = 0
         self.coins_needed = 60
         #self.time_left = 110
-        self.time_left = 500
         self.game_over = False
         self.game_won = False
         
@@ -110,9 +109,9 @@ class GameView(arcade.Window):
 
         self.gui_camera.use()
 
-        time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
-        arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
-        arcade.draw_text(f"Rüben: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
+      #  time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
+       # arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
+        #arcade.draw_text(f"Rüben: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
 
 
     def on_update(self, delta_time):
@@ -121,10 +120,10 @@ class GameView(arcade.Window):
 
         self.stopper -= delta_time
 
-        self.time_left -= delta_time
-        if self.time_left <= 0:
-            self.time_left = 0
-            self.game_over = True
+       # self.time_left -= delta_time
+        #if self.time_left <= 0:
+         #   self.time_left = 0
+          #  self.game_over = True
 
     
         coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
