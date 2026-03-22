@@ -238,12 +238,12 @@ class GameView(arcade.Window):
 
         spawner3_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner3_list)
         if spawner3_hit_list:
-            self.player_sprite.center_x = 1000
+            self.player_sprite.center_x = 3385
             self.player_sprite.center_y = 100
 
         spawner4_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner4_list)
         if spawner4_hit_list:
-            self.player_sprite.center_x = 2000
+            self.player_sprite.center_x = 5300
             self.player_sprite.center_y = 100
         
     
