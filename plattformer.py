@@ -94,6 +94,10 @@ class GameView(arcade.Window):
 
         self.spawner2_list = self.scene["spawner2"]
 
+        self.spawner3_list = self.scene["spawner3"]
+
+        self.spawner4_list = self.scene["spawner4"]
+
        
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(self.player_sprite, gravity_constant=GRAVITY, platforms=platforms)
@@ -230,6 +234,17 @@ class GameView(arcade.Window):
         if spawner2_hit_list:
             self.player_sprite.center_x = 100
             self.player_sprite.center_y = 100
+
+
+        spawner3_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner3_list)
+        if spawner3_hit_list:
+            self.player_sprite.center_x = 1000
+            self.player_sprite.center_y = 100
+
+        spawner4_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner4_list)
+        if spawner4_hit_list:
+            self.player_sprite.center_x = 2000
+            self.player_sprite.center_y = 100
         
     
     def on_key_press(self, key, modifiers):
@@ -243,7 +258,7 @@ class GameView(arcade.Window):
 
        
         if not self.game_over and not self.game_won:
-            if key in [arcade.key.UP, arcade.key.W]:
+            if key in [arcade.key.SPACE, arcade.key.W, arcade.key.UP]:
                 if self.physics_engine.can_jump():
                     self.player_sprite.change_y = PLAYER_JUMP_SPEED
 
