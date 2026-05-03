@@ -53,7 +53,7 @@ class GameView(arcade.Window):
             scaling=TILE_SCALING,
             layer_options=layer_options
         )
-        
+        self.stopper = 0
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
         self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
@@ -97,6 +97,7 @@ class GameView(arcade.Window):
         self.spawner3_list = self.scene["spawner3"]
 
         self.spawner4_list = self.scene["spawner4"]
+        self.böses_monster = self.scene["böses_monster"]
 
        
 
@@ -201,6 +202,7 @@ class GameView(arcade.Window):
 
         sprungblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.sprungblock_list)
         for sprungblock in sprungblock_hit_list:
+            self.player_sprite.change_y = PLAYER_JUMP_SPEED
             sprungblock.remove_from_sprite_lists()
             self.player_sprite.change_y = PLAYER_JUMP_SPEED * 1
 
@@ -245,6 +247,18 @@ class GameView(arcade.Window):
         if spawner4_hit_list:
             self.player_sprite.center_x = 5300
             self.player_sprite.center_y = 100
+
+        self.böses_monster.update()
+        shoot = arcade.check_for_collision_with_list(self.player_sprite, self.böses_monster_list)
+        for monster in self.böses_monster_list:
+            if arcade.check_for_collision(self.player_sprite, monster):
+                self.stopper = 0.5
+            monster.center_x -= 2
+        if monster.center_x < 0:
+            monster.center_x = 100
+            monster.center_y = 4000
+
+             
         
     
     def on_key_press(self, key, modifiers):
@@ -272,8 +286,12 @@ class GameView(arcade.Window):
                 self.player_sprite.center_x = 100
                 self.player_sprite.center_y = 4000
 
-            if key == arcade.key.SPACE:
-                self.time_left -= 10
+            #if key == arcade.key.SPACE:
+                #self.time_left -= 10
+
+                if key == arcade.key.A:
+                    self.player_sprite.center_x = 100
+                self.player_sprite.center_y = 4000
 
            
 
