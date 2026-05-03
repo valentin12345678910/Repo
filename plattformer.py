@@ -77,6 +77,7 @@ class GameView(arcade.Window):
         self.spawner3_list = self.scene["spawner3"]
         self.spawner4_list = self.scene["spawner4"]
         self.böses_monster_list = self.scene["böses_monster"]
+        
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite,
@@ -205,26 +206,15 @@ class GameView(arcade.Window):
             self.player_sprite.center_x = 5300
             self.player_sprite.center_y = 100
 
-        self.böses_monster_list
-        shoots = []
+        self.böses_monster_list.update()
+        shoot = arcade.check_for_collision_with_list(self.player_sprite, self.böses_monster_list)
         for monster in self.böses_monster_list:
-            if monster.center_x < self.player_sprite.center_x:
-                shoots.append(arcade.Sprite("kugel", scale=0.5))
-                shoots[-1].center_x = monster.center_x + 20
-                shoots[-1].center_y = monster.center_y
-                shoots[-1].change_x = 5
-            else:
-                shoots.append(arcade.Sprite("kugel", scale=0.5))
-                shoots[-1].center_x = monster.center_x - 20
-                shoots[-1].center_y = monster.center_y
-                shoots[-1].change_x = -5
-        if self.böses_monster_list and self.stopper <= 0:
-            self.stopper = 2
-
-
-
-
-
+            if arcade.check_for_collision(self.player_sprite, monster):
+                self.stopper = 0.5
+            monster.center_x -= 2
+        if monster.center_x < 0:
+            monster.center_x = 100
+            monster.center_y = 4000
     def on_key_press(self, key, modifiers):
         try:
             self.held_keys.add(key)
@@ -243,6 +233,10 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+
+            if key == arcade.key.A:
+                self.player_sprite.center_x = 100
+                self.player_sprite.center_y = 4000
 
     def on_key_release(self, key, modifiers):
         try:
