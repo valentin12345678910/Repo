@@ -8,15 +8,15 @@ WINDOW_TITLE = "Platformer"
 TILE_SCALING = 3
 COIN_SCALING = 0.5
  
-GRAVITY = 0.8
-PLAYER_MOVEMENT_SPEED = 3
-PLAYER_JUMP_SPEED = 11
+#GRAVITY = 0.8
+#PLAYER_MOVEMENT_SPEED = 3
+#PLAYER_JUMP_SPEED = 11
 LEDER_SPEED = 5
 
 
-#GRAVITY = 0.5
-#PLAYER_MOVEMENT_SPEED = 5
-#PLAYER_JUMP_SPEED = 10
+GRAVITY = 0.1
+PLAYER_MOVEMENT_SPEED = 15
+PLAYER_JUMP_SPEED = 15
 
 class GameView(arcade.Window):
     def __init__(self):
@@ -37,7 +37,7 @@ class GameView(arcade.Window):
     
         self.coins_collected = 0
         self.coins_needed = 60
-        #self.time_left = 110
+        self.time_left = 150
         self.game_over = False
         self.game_won = False
         
@@ -113,9 +113,9 @@ class GameView(arcade.Window):
 
         self.gui_camera.use()
 
-      #  time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
-       # arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
-        #arcade.draw_text(f"Rüben: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
+        time_color = arcade.color.WHITE if self.time_left > 10 else arcade.color.RED
+        arcade.draw_text(f"Zeit: {int(self.time_left)}", 10, 40, time_color, 18)
+        arcade.draw_text(f"Rüben: {self.coins_collected} / {self.coins_needed}", 10, 60, arcade.color.WHITE, 18)
 
 
     def on_update(self, delta_time):
@@ -124,10 +124,10 @@ class GameView(arcade.Window):
 
         self.stopper -= delta_time
 
-       # self.time_left -= delta_time
-        #if self.time_left <= 0:
-         #   self.time_left = 0
-          #  self.game_over = True
+        self.time_left -= delta_time
+        if self.time_left <= 0:
+            self.time_left = 0
+            self.game_over = True
 
     
         coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
@@ -267,13 +267,13 @@ class GameView(arcade.Window):
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
-            #if key == arcade.key.SPACE:
-            #    self.space_pressed = True
-            #    self.player_sprite.center_x = 100
-            #    self.player_sprite.center_y = 4000
+            if key == arcade.key.SPACE:
+                self.space_pressed = True
+                self.player_sprite.center_x = 100
+                self.player_sprite.center_y = 4000
 
-            #if key == arcade.key.SPACE:
-             #   self.time_left -= 10
+            if key == arcade.key.SPACE:
+                self.time_left -= 10
 
            
 
