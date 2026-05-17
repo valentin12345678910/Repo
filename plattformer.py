@@ -1,4 +1,5 @@
 import arcade
+import random
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -77,7 +78,11 @@ class GameView(arcade.Window):
         self.spawner3_list = self.scene["spawner3"]
         self.spawner4_list = self.scene["spawner4"]
         self.böses_monster_list = self.scene["böses_monster"]
-        
+
+        # 👉 Monster Spawn speichern
+        for monster in self.böses_monster_list:
+            monster.start_x = monster.center_x
+            monster.start_y = monster.center_y
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite,
@@ -109,8 +114,8 @@ class GameView(arcade.Window):
         else:
             self.player_sprite.alpha = 255
 
+        # Coins
         coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
-
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
             self.coins_collected += 1
@@ -121,7 +126,8 @@ class GameView(arcade.Window):
         self.physics_engine.update()
         self.player_sprite.update()
 
-        if getattr(self, "on_ladder", False):
+        # Ladder
+        if self.on_ladder:
             if arcade.key.UP in self.held_keys or arcade.key.W in self.held_keys:
                 self.player_sprite.change_y = LEDER_SPEED
             elif arcade.key.DOWN in self.held_keys or arcade.key.S in self.held_keys:
@@ -131,54 +137,71 @@ class GameView(arcade.Window):
 
         self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
+        # Monster Hit
         monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
         if monster_hit_list and self.stopper <= 0:
             self.stopper = 2
 
-        spawner_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list)
-        if spawner_hit_list:
+        # ❗ BÖSES MONSTER (mit Respawn)
+        for monster in self.böses_monster_list:
+            monster.center_x -= 2
+            monster.center_y -= 0.5
+
+            if monster.center_x < 0 or monster.center_y < 0:
+                monster.center_x = monster.start_x
+                monster.center_y = monster.start_y
+
+        # Spawner Reset
+        if arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list):
             self.player_sprite.center_x = 100
             self.player_sprite.center_y = 4000
 
-        jetpack_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list)
-        for jetpack in jetpack_hit_list:
+        if arcade.check_for_collision_with_list(self.player_sprite, self.spawner2_list):
+            self.player_sprite.center_x = 100
+            self.player_sprite.center_y = 100
+
+        if arcade.check_for_collision_with_list(self.player_sprite, self.spawner3_list):
+            self.player_sprite.center_x = 3385
+            self.player_sprite.center_y = 100
+
+        if arcade.check_for_collision_with_list(self.player_sprite, self.spawner4_list):
+            self.player_sprite.center_x = 5300
+            self.player_sprite.center_y = 100
+
+        # Items
+        for jetpack in arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list):
             jetpack.remove_from_sprite_lists()
 
-        op_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.op_list)
-        for op in op_hit_list:
+        for op in arcade.check_for_collision_with_list(self.player_sprite, self.op_list):
             op.remove_from_sprite_lists()
 
-        megajetpack_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.megajetpack_list)
-        for megajetpack in megajetpack_hit_list:
+        for megajetpack in arcade.check_for_collision_with_list(self.player_sprite, self.megajetpack_list):
             megajetpack.remove_from_sprite_lists()
 
-        goldenerop_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.goldenerop_list)
-        for goldenerop in goldenerop_hit_list:
+        for goldenerop in arcade.check_for_collision_with_list(self.player_sprite, self.goldenerop_list):
             goldenerop.remove_from_sprite_lists()
 
-        zuffalblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.zuffalblock_list)
-        for zuffalblock in zuffalblock_hit_list:
+        # Random block
+        for zuffalblock in arcade.check_for_collision_with_list(self.player_sprite, self.zuffalblock_list):
             zuffalblock.remove_from_sprite_lists()
-            import random
             self.game_over = random.choice([True, False])
 
-        supersprungblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.supersprungblock_list)
-        for supersprungblock in supersprungblock_hit_list:
+        # Jump blocks
+        for supersprungblock in arcade.check_for_collision_with_list(self.player_sprite, self.supersprungblock_list):
             supersprungblock.remove_from_sprite_lists()
             self.player_sprite.change_y = PLAYER_JUMP_SPEED * 2
 
-        sprungblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.sprungblock_list)
-        for sprungblock in sprungblock_hit_list:
+        for sprungblock in arcade.check_for_collision_with_list(self.player_sprite, self.sprungblock_list):
             self.player_sprite.change_y = PLAYER_JUMP_SPEED
 
-        langsamblock_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.langsamblock_list)
-        for langsamblock in langsamblock_hit_list:
+        # Slow block
+        for langsamblock in arcade.check_for_collision_with_list(self.player_sprite, self.langsamblock_list):
             langsamblock.remove_from_sprite_lists()
             global PLAYER_MOVEMENT_SPEED
             PLAYER_MOVEMENT_SPEED = max(2, PLAYER_MOVEMENT_SPEED - 0.4)
 
-        freezer_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.freezer_list)
-        for freezer in freezer_hit_list:
+        # Freezer
+        for freezer in arcade.check_for_collision_with_list(self.player_sprite, self.freezer_list):
             freezer.remove_from_sprite_lists()
             self.stopper = 3
 
@@ -217,10 +240,7 @@ class GameView(arcade.Window):
             monster.center_x = 
             monster.center_y = 
     def on_key_press(self, key, modifiers):
-        try:
-            self.held_keys.add(key)
-        except Exception:
-            pass
+        self.held_keys.add(key)
 
         if key == arcade.key.ESCAPE:
             self.close()
@@ -235,20 +255,12 @@ class GameView(arcade.Window):
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
-            if key == arcade.key.A:
-                self.player_sprite.center_x = 100
-                self.player_sprite.center_y = 4000
-
     def on_key_release(self, key, modifiers):
-        try:
-            if key in self.held_keys:
-                self.held_keys.remove(key)
-        except Exception:
-            pass
+        if key in self.held_keys:
+            self.held_keys.remove(key)
 
         if key in [arcade.key.LEFT, arcade.key.A, arcade.key.RIGHT, arcade.key.D]:
-            if self.player_sprite is not None:
-                self.player_sprite.change_x = 0
+            self.player_sprite.change_x = 0
 
 
 def main():
