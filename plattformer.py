@@ -212,9 +212,10 @@ class GameView(arcade.Window):
             if arcade.check_for_collision(self.player_sprite, monster):
                 self.stopper = 0.5
             monster.center_x -= 2
+            monster.center_y -= 0.5
         if monster.center_x < 0:
-            monster.center_x = 100
-            monster.center_y = 4000
+            monster.center_x = 
+            monster.center_y = 
     def on_key_press(self, key, modifiers):
         try:
             self.held_keys.add(key)
