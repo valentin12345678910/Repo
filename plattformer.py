@@ -35,6 +35,7 @@ class GameView(arcade.Window):
         self.coins_needed = 60
         self.game_over = False
         self.game_won = False
+        self.leben = 20
 
         self.stopper = 0
 
@@ -79,7 +80,7 @@ class GameView(arcade.Window):
         self.spawner4_list = self.scene["spawner4"]
         self.böses_monster_list = self.scene["böses_monster"]
 
-        # 👉 Monster Spawn speichern
+        
         for monster in self.böses_monster_list:
             monster.start_x = monster.center_x
             monster.start_y = monster.center_y
@@ -98,6 +99,14 @@ class GameView(arcade.Window):
         self.player_list.draw(pixelated=True)
 
         self.gui_camera.use()
+
+        self.leben_text = arcade.draw_text(
+    text=f"Leben: {self.leben}",
+    x=10,                      
+    y=10,                      
+    color=arcade.color.BLACK,  
+    font_size=14            
+)
 
     def on_update(self, delta_time):
         if self.game_over or self.game_won:
@@ -233,12 +242,20 @@ class GameView(arcade.Window):
         shoot = arcade.check_for_collision_with_list(self.player_sprite, self.böses_monster_list)
         for monster in self.böses_monster_list:
             if arcade.check_for_collision(self.player_sprite, monster):
-                self.stopper = 0.5
+                self.stopper = 0.2
             monster.center_x -= 2
             monster.center_y -= 0.5
         if monster.center_x < 0:
-            monster.center_x = 
-            monster.center_y = 
+            monster.center_x = 100
+            monster.center_y = 4000
+
+        if collision := arcade.check_for_collision_with_list(self.player_sprite, self.böses_monster_list):
+            self.leben -= 1
+
+            if self.leben <= 0:
+                self.game_over = True
+
+
     def on_key_press(self, key, modifiers):
         self.held_keys.add(key)
 
@@ -254,6 +271,17 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+
+            if key == arcade.key.R:
+                self.setup()
+
+        self.coins_collected = 0
+        self.game_over = False
+        self.game_won = False
+        self.leben = 20
+               
+        
+
 
     def on_key_release(self, key, modifiers):
         if key in self.held_keys:
