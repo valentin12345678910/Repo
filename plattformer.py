@@ -39,7 +39,7 @@ class GameView(arcade.Window):
         self.coins_needed = 60
         self.game_over = False
         self.game_won = False
-        self.leben = 10
+        self.leben = 20
 
         self.stopper = 0
         self.immune_time = 0
@@ -85,6 +85,7 @@ class GameView(arcade.Window):
         self.spawner4_list = self.scene["spawner4"]
         self.böses_monster_list = self.scene["böses_monster"]
         self.stop_monster_list = self.scene["stop_monster"]
+        self.einleben_list = self.scene["einleben"]
 
         
         for monster in self.böses_monster_list:
@@ -270,6 +271,12 @@ class GameView(arcade.Window):
         if spawner4_hit_list:
             self.player_sprite.center_x = 5300
             self.player_sprite.center_y = 100
+
+        einleben_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.einleben_list)
+        if einleben_hit_list:
+            for item in einleben_hit_list:
+                item.remove_from_sprite_lists()
+                self.leben += 1
 
         self.böses_monster_list.update()
         for monster in self.böses_monster_list:
