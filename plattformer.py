@@ -11,16 +11,12 @@ COIN_SCALING = 0.5
 GRAVITY = 0.8
 PLAYER_MOVEMENT_SPEED = 3.2
 PLAYER_JUMP_SPEED = 11
-LEDER_SPEED = 5
+LADDER_SPEED = 5
 
 EVIL_MONSTER_SPEED_X = 5
 EVIL_MONSTER_SPEED_Y = 0.9
 STOP_MONSTER_SPEED_X = 5
 STOP_MONSTER_SPEED_Y = 0.9
-
-#GRAVITY = 0.7
-#PLAYER_MOVEMENT_SPEED = 10
-#PLAYER_JUMP_SPEED = 13
 
 
 class GameView(arcade.Window):
@@ -49,6 +45,7 @@ class GameView(arcade.Window):
 
         self.stopper = 0
         self.immune_time = 0
+        self.jump_count = 0  # Trackt die Anzahl der Sprünge
 
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
@@ -62,10 +59,11 @@ class GameView(arcade.Window):
         self.stopper = 0
         self.immune_time = 0
         self.on_ladder = False
-        self.held_keys.clear()  # Verhindert, dass Tasten nach dem Reset "hängenbleiben"
+        self.jump_count = 0  # Zurücksetzen beim Spielstart/Reset
+        self.held_keys.clear()  
         
         global PLAYER_MOVEMENT_SPEED
-        PLAYER_MOVEMENT_SPEED = 3.2  # Setzt die verlangsamte Geschwindigkeit wieder zurück
+        PLAYER_MOVEMENT_SPEED = 3.2  
 
         layer_options = {
             "Plattformen": {"use_spatial_hash": True}
@@ -79,9 +77,7 @@ class GameView(arcade.Window):
 
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
-        # Liste leeren, damit beim Reset kein zweiter Spieler entsteht
-
-        
+        self.player_list = arcade.SpriteList()
         self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
         self.player_list.append(self.player_sprite)
         self.player_sprite.center_x = 100
@@ -194,14 +190,21 @@ class GameView(arcade.Window):
         self.physics_engine.update()
         self.player_sprite.update()
 
+        # Wenn der Spieler wieder festen Boden unter den Füßen hat, Sprungzähler zurücksetzen
+        if self.physics_engine.can_jump():
+            self.jump_count = 0
+
         # Ladder
         if self.on_ladder:
+            self.physics_engine.gravity_constant = 0
             if arcade.key.UP in self.held_keys or arcade.key.W in self.held_keys:
-                self.player_sprite.change_y = LEDER_SPEED
+                self.player_sprite.change_y = LADDER_SPEED
             elif arcade.key.DOWN in self.held_keys or arcade.key.S in self.held_keys:
-                self.player_sprite.change_y = -LEDER_SPEED
+                self.player_sprite.change_y = -LADDER_SPEED
             else:
                 self.player_sprite.change_y = 0
+        else:
+            self.physics_engine.gravity_constant = GRAVITY
 
         self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
@@ -226,26 +229,30 @@ class GameView(arcade.Window):
             self.player_sprite.center_y = 100
 
         if arcade.check_for_collision_with_list(self.player_sprite, self.safespawner_list):
-            self.player_sprite.center_x = 4500
-            self.player_sprite.center_y = 100
+            self.player_sprite.center_x = 4200
+            self.player_sprite.center_y = 900
 
         # Items
         for jetpack in arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list):
             jetpack.remove_from_sprite_lists()
+            self.time_left += 15
 
         for op in arcade.check_for_collision_with_list(self.player_sprite, self.op_list):
             op.remove_from_sprite_lists()
+            self.time_left += 15
 
         for megajetpack in arcade.check_for_collision_with_list(self.player_sprite, self.megajetpack_list):
             megajetpack.remove_from_sprite_lists()
+            self.time_left = max(0, self.time_left - 30)
 
         for goldenerop in arcade.check_for_collision_with_list(self.player_sprite, self.goldenerop_list):
             goldenerop.remove_from_sprite_lists()
+            self.time_left += 30
 
         # Random block
         for zuffalblock in arcade.check_for_collision_with_list(self.player_sprite, self.zuffalblock_list):
             zuffalblock.remove_from_sprite_lists()
-            self.game_over = random.choice([True, False])
+            self.time_left = max(0, self.time_left + random.choice((50, -50)))
 
         # Jump blocks
         for supersprungblock in arcade.check_for_collision_with_list(self.player_sprite, self.supersprungblock_list):
@@ -311,7 +318,6 @@ class GameView(arcade.Window):
                 monster.center_x = monster.start_x
                 monster.center_y = monster.start_y
 
-
     def on_key_press(self, key, modifiers):
         self.held_keys.add(key)
 
@@ -323,21 +329,34 @@ class GameView(arcade.Window):
 
         if not self.game_over and not self.game_won and self.stopper <= 0:
             if key in [arcade.key.SPACE, arcade.key.W, arcade.key.UP]:
+                # Erster normaler Sprung vom Boden aus
                 if self.physics_engine.can_jump():
                     self.player_sprite.change_y = PLAYER_JUMP_SPEED
+                    self.jump_count = 1
+                # Doppelsprung in der Luft (wenn noch kein zweiter Sprung gemacht wurde)
+                elif self.jump_count < 2 and not self.on_ladder:
+                    self.player_sprite.change_y = PLAYER_JUMP_SPEED
+                    self.jump_count = 2
 
             if key in [arcade.key.LEFT, arcade.key.A]:
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
 
-
     def on_key_release(self, key, modifiers):
         if key in self.held_keys:
             self.held_keys.remove(key)
 
-        if key in [arcade.key.LEFT, arcade.key.A, arcade.key.RIGHT, arcade.key.D]:
-            self.player_sprite.change_x = 0
+        if key in [arcade.key.LEFT, arcade.key.A]:
+            if arcade.key.RIGHT in self.held_keys or arcade.key.D in self.held_keys:
+                self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+            else:
+                self.player_sprite.change_x = 0
+        elif key in [arcade.key.RIGHT, arcade.key.D]:
+            if arcade.key.LEFT in self.held_keys or arcade.key.A in self.held_keys:
+                self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
+            else:
+                self.player_sprite.change_x = 0
 
 
 def main():
