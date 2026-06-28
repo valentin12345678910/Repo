@@ -9,12 +9,17 @@ TILE_SCALING = 3
 COIN_SCALING = 0.5
 
 GRAVITY = 0.8
-PLAYER_MOVEMENT_SPEED = 3
+PLAYER_MOVEMENT_SPEED = 3.2
 PLAYER_JUMP_SPEED = 11
 LEDER_SPEED = 5
 
+EVIL_MONSTER_SPEED_X = 5
+EVIL_MONSTER_SPEED_Y = 0.9
+STOP_MONSTER_SPEED_X = 5
+STOP_MONSTER_SPEED_Y = 0.9
+
 #GRAVITY = 0.7
-#PLAYER_MOVEMENT_SPEED = 5
+#PLAYER_MOVEMENT_SPEED = 10
 #PLAYER_JUMP_SPEED = 13
 
 
@@ -39,7 +44,8 @@ class GameView(arcade.Window):
         self.coins_needed = 60
         self.game_over = False
         self.game_won = False
-        self.leben = 20
+        self.leben = 23
+        self.time_left = 400
 
         self.stopper = 0
         self.immune_time = 0
@@ -47,6 +53,20 @@ class GameView(arcade.Window):
         arcade.set_background_color(arcade.csscolor.CORNFLOWER_BLUE)
 
     def setup(self):
+        # --- Spielstatus komplett zurücksetzen ---
+        self.coins_collected = 0
+        self.game_over = False
+        self.game_won = False
+        self.leben = 23
+        self.time_left = 400
+        self.stopper = 0
+        self.immune_time = 0
+        self.on_ladder = False
+        self.held_keys.clear()  # Verhindert, dass Tasten nach dem Reset "hängenbleiben"
+        
+        global PLAYER_MOVEMENT_SPEED
+        PLAYER_MOVEMENT_SPEED = 3.2  # Setzt die verlangsamte Geschwindigkeit wieder zurück
+
         layer_options = {
             "Plattformen": {"use_spatial_hash": True}
         }
@@ -59,6 +79,9 @@ class GameView(arcade.Window):
 
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
+        # Liste leeren, damit beim Reset kein zweiter Spieler entsteht
+
+        
         self.player_sprite = arcade.Sprite("spieler2.png", scale=0.5)
         self.player_list.append(self.player_sprite)
         self.player_sprite.center_x = 100
@@ -68,8 +91,8 @@ class GameView(arcade.Window):
         self.wall_list = platforms
 
         self.coin_list = self.scene["Münzen"]
-        self.monster_list = self.scene["monster"]
         self.jetpack_list = self.scene["jetpack"]
+        self.kürbis_list = self.scene["kürbis"]
         self.op_list = self.scene["op"]
         self.goldenerop_list = self.scene["goldenerop"]
         self.megajetpack_list = self.scene["megajetpack"]
@@ -86,11 +109,11 @@ class GameView(arcade.Window):
         self.böses_monster_list = self.scene["böses_monster"]
         self.stop_monster_list = self.scene["stop_monster"]
         self.einleben_list = self.scene["einleben"]
+        self.safespawner_list = self.scene["safespawner"]
 
-        
-        for monster in self.böses_monster_list:
-            monster.start_x = monster.center_x
-            monster.start_y = monster.center_y
+        for böses_monster in self.böses_monster_list:
+            böses_monster.start_x = böses_monster.center_x
+            böses_monster.start_y = böses_monster.center_y
 
         for stop_monster in self.stop_monster_list:
             stop_monster.start_x = stop_monster.center_x
@@ -112,17 +135,36 @@ class GameView(arcade.Window):
         self.gui_camera.use()
 
         self.leben_text = arcade.draw_text(
-    text=f"Leben: {self.leben}",
-    x=10,                      
-    y=10,                      
-    color=arcade.color.WHITE,  
-    font_size=14            
-)
+            text=f"Leben: {self.leben}",
+            x=10,                      
+            y=10,                      
+            color=arcade.color.WHITE,  
+            font_size=14
+        )
 
+        self.coins_text = arcade.draw_text(
+            text=f"Münzen: {self.coins_collected}/{self.coins_needed}",
+            x=10,                      
+            y=30,                      
+            color=arcade.color.WHITE,
+            font_size=14        
+        )
+        
+        self.time_text = arcade.draw_text( 
+            text=f"Zeit: {int(self.time_left)}",
+            x=10,
+            y=50,
+            color=arcade.color.WHITE,
+            font_size=14
+        )
 
     def on_update(self, delta_time):
         if self.game_over or self.game_won:
             return
+
+        self.time_left = max(0, self.time_left - delta_time)
+        if self.time_left <= 0:
+            self.game_over = True
 
         self.stopper -= delta_time
         if self.immune_time > 0:
@@ -163,37 +205,6 @@ class GameView(arcade.Window):
 
         self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
-        # Monster Hit
-        monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
-        if monster_hit_list and self.stopper <= 0:
-            self.stopper = 2
-
-
-        for böses_monster in self.böses_monster_list:
-            böses_monster.center_x -= 2
-            böses_monster.center_y -= 0.5
-
-            if böses_monster.center_x < 0 or böses_monster.center_y < 0:
-                böses_monster.center_x = böses_monster.start_x
-                böses_monster.center_y = böses_monster.start_y
-
-        for stop_monster in self.stop_monster_list:
-            stop_monster.center_x -= 2
-            stop_monster.center_y -= 0.5
-
-            if stop_monster.center_x < 0 or stop_monster.center_y < 0:
-                stop_monster.center_x = stop_monster.start_x
-                stop_monster.center_y = stop_monster.start_y
-
-        # Spawner Reset
-        if arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list):
-            self.player_sprite.center_x = 100
-            self.player_sprite.center_y = 4000
-
-        if arcade.check_for_collision_with_list(self.player_sprite, self.spawner2_list):
-            self.player_sprite.center_x = 100
-            self.player_sprite.center_y = 100
-
         # Spawner Reset
         if arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list):
             self.player_sprite.center_x = 100
@@ -207,8 +218,15 @@ class GameView(arcade.Window):
             self.player_sprite.center_x = 3385
             self.player_sprite.center_y = 100
 
+        if arcade.check_for_collision_with_list(self.player_sprite, self.kürbis_list):
+            self.game_over = True
+
         if arcade.check_for_collision_with_list(self.player_sprite, self.spawner4_list):
             self.player_sprite.center_x = 5300
+            self.player_sprite.center_y = 100
+
+        if arcade.check_for_collision_with_list(self.player_sprite, self.safespawner_list):
+            self.player_sprite.center_x = 4500
             self.player_sprite.center_y = 100
 
         # Items
@@ -257,27 +275,13 @@ class GameView(arcade.Window):
         else:
             self.on_ladder = False
 
-        spawner2_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner2_list)
-        if spawner2_hit_list:
-            self.player_sprite.center_x = 100
-            self.player_sprite.center_y = 100
-
-        spawner3_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner3_list)
-        if spawner3_hit_list:
-            self.player_sprite.center_x = 3385
-            self.player_sprite.center_y = 100
-
-        spawner4_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner4_list)
-        if spawner4_hit_list:
-            self.player_sprite.center_x = 5300
-            self.player_sprite.center_y = 100
-
         einleben_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.einleben_list)
         if einleben_hit_list:
             for item in einleben_hit_list:
                 item.remove_from_sprite_lists()
                 self.leben += 1
 
+        # Böses Monster Update & Bewegung
         self.böses_monster_list.update()
         for monster in self.böses_monster_list:
             if arcade.check_for_collision(self.player_sprite, monster):
@@ -286,15 +290,26 @@ class GameView(arcade.Window):
                     self.immune_time = 2
                     if self.leben <= 0:
                         self.game_over = True
-            monster.center_x -= 2
-            monster.center_y -= 0.7
+            monster.center_x -= EVIL_MONSTER_SPEED_X
+            monster.center_y -= EVIL_MONSTER_SPEED_Y
+            
+            if monster.center_x < 0 or monster.center_y < 0:
+                monster.center_x = monster.start_x
+                monster.center_y = monster.start_y
 
+        # Stop-Monster Update & Bewegung
         self.stop_monster_list.update()
         for monster in self.stop_monster_list:
             if arcade.check_for_collision(self.player_sprite, monster):
-                self.stopper = 0.1
-            monster.center_x -= 2
-            monster.center_y -= 0.7
+                if self.stopper <= 0:
+                    self.stopper = 0.09  
+            
+            monster.center_x -= STOP_MONSTER_SPEED_X
+            monster.center_y -= STOP_MONSTER_SPEED_Y
+
+            if monster.center_x < 0 or monster.center_y < 0:
+                monster.center_x = monster.start_x
+                monster.center_y = monster.start_y
 
 
     def on_key_press(self, key, modifiers):
@@ -302,6 +317,9 @@ class GameView(arcade.Window):
 
         if key == arcade.key.ESCAPE:
             self.close()
+
+        if arcade.key.R == key:
+            self.setup()
 
         if not self.game_over and not self.game_won and self.stopper <= 0:
             if key in [arcade.key.SPACE, arcade.key.W, arcade.key.UP]:
@@ -312,12 +330,6 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
-
-            if key == arcade.key.R:
-                self.__init__(print("Restarting Game..."))
-
-
-        
 
 
     def on_key_release(self, key, modifiers):
