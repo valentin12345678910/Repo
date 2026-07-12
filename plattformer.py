@@ -8,10 +8,14 @@ WINDOW_TITLE = "Platformer"
 TILE_SCALING = 3
 COIN_SCALING = 0.5
 
-GRAVITY = 0.8
-PLAYER_MOVEMENT_SPEED = 3.2
-PLAYER_JUMP_SPEED = 11
+#GRAVITY = 0.8
+#PLAYER_MOVEMENT_SPEED = 3.2
+#PLAYER_JUMP_SPEED = 11
 LADDER_SPEED = 5
+
+GRAVITY = 0.7
+PLAYER_MOVEMENT_SPEED = 10
+PLAYER_JUMP_SPEED = 13
 
 EVIL_MONSTER_SPEED_X = 5
 EVIL_MONSTER_SPEED_Y = 0.9
@@ -40,8 +44,10 @@ class GameView(arcade.Window):
         self.coins_needed = 60
         self.game_over = False
         self.game_won = False
-        self.leben = 23
-        self.time_left = 400
+        self.leben = 1
+        self.time_left = 1
+        #self.time_left = 60
+
 
         self.stopper = 0
         self.immune_time = 0
@@ -54,8 +60,9 @@ class GameView(arcade.Window):
         self.coins_collected = 0
         self.game_over = False
         self.game_won = False
-        self.leben = 23
+        self.leben = 1
         self.time_left = 400
+        #self.time_left = 60
         self.stopper = 0
         self.immune_time = 0
         self.on_ladder = False
@@ -154,6 +161,8 @@ class GameView(arcade.Window):
             color=arcade.color.WHITE,
             font_size=14
         )
+
+
 
     def on_update(self, delta_time):
         if self.game_over or self.game_won:
