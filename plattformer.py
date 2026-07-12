@@ -106,6 +106,7 @@ class GameView(arcade.Window):
         self.stop_monster_list = self.scene["stop_monster"]
         self.einleben_list = self.scene["einleben"]
         self.safespawner_list = self.scene["safespawner"]
+        self.safespawner2_list = self.scene["safespawner2"]
 
         for böses_monster in self.böses_monster_list:
             böses_monster.start_x = böses_monster.center_x
@@ -232,6 +233,10 @@ class GameView(arcade.Window):
             self.player_sprite.center_x = 4200
             self.player_sprite.center_y = 900
 
+        if arcade.check_for_collision_with_list(self.player_sprite, self.safespawner2_list):
+            self.player_sprite.center_x = 6460
+            self.player_sprite.center_y = 320
+
         # Items
         for jetpack in arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list):
             jetpack.remove_from_sprite_lists()
@@ -342,6 +347,7 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+
 
     def on_key_release(self, key, modifiers):
         if key in self.held_keys:
