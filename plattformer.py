@@ -35,7 +35,7 @@ class GameView(arcade.Window):
         self.coins_needed = 60
         self.game_over = False
         self.game_won = False
-        self.leben = 20
+        self.böses_monster_list = None
 
         self.stopper = 0
 
@@ -80,7 +80,6 @@ class GameView(arcade.Window):
         self.spawner4_list = self.scene["spawner4"]
         self.böses_monster_list = self.scene["böses_monster"]
 
-        
         for monster in self.böses_monster_list:
             monster.start_x = monster.center_x
             monster.start_y = monster.center_y
@@ -100,14 +99,6 @@ class GameView(arcade.Window):
 
         self.gui_camera.use()
 
-        self.leben_text = arcade.draw_text(
-    text=f"Leben: {self.leben}",
-    x=10,                      
-    y=10,                      
-    color=arcade.color.BLACK,  
-    font_size=14            
-)
-
     def on_update(self, delta_time):
         if self.game_over or self.game_won:
             return
@@ -123,7 +114,7 @@ class GameView(arcade.Window):
         else:
             self.player_sprite.alpha = 255
 
-        # Coins
+        
         coin_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.coin_list)
         for coin in coin_hit_list:
             coin.remove_from_sprite_lists()
@@ -135,7 +126,7 @@ class GameView(arcade.Window):
         self.physics_engine.update()
         self.player_sprite.update()
 
-        # Ladder
+
         if self.on_ladder:
             if arcade.key.UP in self.held_keys or arcade.key.W in self.held_keys:
                 self.player_sprite.change_y = LEDER_SPEED
@@ -146,12 +137,11 @@ class GameView(arcade.Window):
 
         self.camera.position = (self.player_sprite.center_x, self.player_sprite.center_y)
 
-        # Monster Hit
+        
         monster_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.monster_list)
         if monster_hit_list and self.stopper <= 0:
             self.stopper = 2
 
-        # ❗ BÖSES MONSTER (mit Respawn)
         for monster in self.böses_monster_list:
             monster.center_x -= 2
             monster.center_y -= 0.5
@@ -159,8 +149,8 @@ class GameView(arcade.Window):
             if monster.center_x < 0 or monster.center_y < 0:
                 monster.center_x = monster.start_x
                 monster.center_y = monster.start_y
-
-        # Spawner Reset
+                immuntime = 4
+        
         if arcade.check_for_collision_with_list(self.player_sprite, self.spawner_list):
             self.player_sprite.center_x = 100
             self.player_sprite.center_y = 4000
@@ -177,7 +167,7 @@ class GameView(arcade.Window):
             self.player_sprite.center_x = 5300
             self.player_sprite.center_y = 100
 
-        # Items
+    
         for jetpack in arcade.check_for_collision_with_list(self.player_sprite, self.jetpack_list):
             jetpack.remove_from_sprite_lists()
 
@@ -190,12 +180,12 @@ class GameView(arcade.Window):
         for goldenerop in arcade.check_for_collision_with_list(self.player_sprite, self.goldenerop_list):
             goldenerop.remove_from_sprite_lists()
 
-        # Random block
+        
         for zuffalblock in arcade.check_for_collision_with_list(self.player_sprite, self.zuffalblock_list):
             zuffalblock.remove_from_sprite_lists()
             self.game_over = random.choice([True, False])
 
-        # Jump blocks
+    
         for supersprungblock in arcade.check_for_collision_with_list(self.player_sprite, self.supersprungblock_list):
             supersprungblock.remove_from_sprite_lists()
             self.player_sprite.change_y = PLAYER_JUMP_SPEED * 2
@@ -203,58 +193,23 @@ class GameView(arcade.Window):
         for sprungblock in arcade.check_for_collision_with_list(self.player_sprite, self.sprungblock_list):
             self.player_sprite.change_y = PLAYER_JUMP_SPEED
 
-        # Slow block
+        
         for langsamblock in arcade.check_for_collision_with_list(self.player_sprite, self.langsamblock_list):
             langsamblock.remove_from_sprite_lists()
             global PLAYER_MOVEMENT_SPEED
             PLAYER_MOVEMENT_SPEED = max(2, PLAYER_MOVEMENT_SPEED - 0.4)
 
-        # Freezer
+        
         for freezer in arcade.check_for_collision_with_list(self.player_sprite, self.freezer_list):
             freezer.remove_from_sprite_lists()
             self.stopper = 3
 
-        leder_hit_list = []
-        if self.leiter_list is not None:
-            leder_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.leiter_list)
+        # Ladder check
+        self.on_ladder = bool(arcade.check_for_collision_with_list(self.player_sprite, self.leiter_list))
 
-        if leder_hit_list:
-            self.on_ladder = True
-        else:
-            self.on_ladder = False
-
-        spawner2_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner2_list)
-        if spawner2_hit_list:
-            self.player_sprite.center_x = 100
-            self.player_sprite.center_y = 100
-
-        spawner3_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner3_list)
-        if spawner3_hit_list:
-            self.player_sprite.center_x = 3385
-            self.player_sprite.center_y = 100
-
-        spawner4_hit_list = arcade.check_for_collision_with_list(self.player_sprite, self.spawner4_list)
-        if spawner4_hit_list:
-            self.player_sprite.center_x = 5300
-            self.player_sprite.center_y = 100
-
-        self.böses_monster_list.update()
-        shoot = arcade.check_for_collision_with_list(self.player_sprite, self.böses_monster_list)
-        for monster in self.böses_monster_list:
-            if arcade.check_for_collision(self.player_sprite, monster):
-                self.stopper = 0.2
-            monster.center_x -= 2
-            monster.center_y -= 0.5
-        if monster.center_x < 0:
-            monster.center_x = 100
-            monster.center_y = 4000
-
-        if collision := arcade.check_for_collision_with_list(self.player_sprite, self.böses_monster_list):
-            self.leben -= 1
-
-            if self.leben <= 0:
-                self.game_over = True
-
+        
+        if arcade.check_for_collision_with_list(self.player_sprite, self.böses_monster_list):
+            self.stopper = 0.5
 
     def on_key_press(self, key, modifiers):
         self.held_keys.add(key)
@@ -271,17 +226,6 @@ class GameView(arcade.Window):
                 self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
             elif key in [arcade.key.RIGHT, arcade.key.D]:
                 self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
-
-            if key == arcade.key.R:
-                self.setup()
-
-        self.coins_collected = 0
-        self.game_over = False
-        self.game_won = False
-        self.leben = 20
-               
-        
-
 
     def on_key_release(self, key, modifiers):
         if key in self.held_keys:
